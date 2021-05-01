@@ -1,3 +1,3 @@
 # Clojure
 
-Swift collections of function that implement Clojure Standard Library
+Clojure Standard Library written in Swift.
