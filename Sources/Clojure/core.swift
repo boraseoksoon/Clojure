@@ -1,29 +1,45 @@
 import Foundation
 
-//class FibIterator : IteratorProtocol {
-//    var (a, b) = (0, 1)
-//
-//    func next() -> Int? {
-//        (a, b) = (b, a + b)
-//        return a
-//    }
-//}
-//
-//let fibs = AnySequence{ FibIterator() }
-//Array(fibs.prefix(10))
+func rand_int(_ n: Int) -> Int {
+    Int.random(in: 0...n)
+}
 
-// [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
+func doseq(_ range: ClojureRange, _ completion: @escaping (Int) -> Void) {
+    range.forEach { completion($0) }
+}
 
+func forloop(_ range: ClojureRange) -> LazySequence<Generator> {
+    Generator(range: range).lazy
+}
 
+// (doseq [x (range 0 10)] (prn x))
+// doseq(range(0, 10)) { print($0) }
 
+//forloop(range(0, 10))
+//    .map { String($0) + "!" }
+//    .forEach { print($0) }
 
+func merge<S>(_ seq1: S, _ seq2: S) -> [S] where S: Sequence {
+    return []
+}
 
+func inc<N>(_ s: N) -> N where N: Numeric {
+    return s + 1
+}
 
+func dec<N>(_ s: N) -> N where N: Numeric {
+    return s - 1
+}
+
+inc(dec(rand_int(10)))
+
+inc(0)
+inc(dec(0))
 
 /// `cycle`
 /// "Returns a lazy (infinite!) sequence of repetitions of the items in coll."
 /// - Parameter range: range to cycle repeatedly
-func cycle(_ range: LazySequence<Array<Int>>) ->
+func cycle(_ range: ClojureRange) ->
     CycleSequence<Range<LazySequence<Array<Int>>.Element>> {
 //    AnySequence<IndexingIterator<Array<Int>>.Element> {
     return CycleSequence(cycling: range.first!..<range.last!)
@@ -113,16 +129,28 @@ public struct CycleIterator<C: Collection>: IteratorProtocol {
 //   .map { $0 }
 //   .first(where: { $0 > 100})
 
-//struct Generator: Sequence, IteratorProtocol {
-//    var start: Int = 1
-//    var i = 1
-//    mutating func next()-> Int?{
-//        defer {
-//            start += 1
-//        }
-//        return start
-//    }
-//}
+struct Generator: Sequence, IteratorProtocol {
+    var start: Int = 1
+    var end: Int = 1
+    var i: Int = 1
+    
+    init(range: ClojureRange) {
+        start = range.first!
+        end = range.last!
+    }
+    
+    mutating func next()-> Int? {
+        defer {
+            start += i
+        }
+        
+        if start >= end {
+            return nil
+        } else {
+            return start
+        }
+    }
+}
 
 /// `take`
 ///
@@ -189,6 +217,21 @@ func reduce<F>(_ arr: [F], _ fn: ((F) -> F)) -> F where F: Numeric {
 // print(sum)
 // 5050
 
-func range(_ from: Int, _ to: Int) -> LazySequence<Array<Int>> {
-    Array((from...to)).lazy
+typealias ClojureRange = LazySequence<Array<Int>>
+func range(_ from: Int, _ to: Int) -> ClojureRange {
+    Array((from..<to)).lazy
 }
+
+//class FibIterator : IteratorProtocol {
+//    var (a, b) = (0, 1)
+//
+//    func next() -> Int? {
+//        (a, b) = (b, a + b)
+//        return a
+//    }
+//}
+//
+//let fibs = AnySequence{ FibIterator() }
+//Array(fibs.prefix(10))
+
+// [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
